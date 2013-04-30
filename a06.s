@@ -26,7 +26,26 @@ go:		mov %cs,%ax
 		int $0x13
 		jnc 2f
 		jmp .
-2:		jmp $bootseg,$0
+#2:		jmp $bootseg,$0
+2:		mov %cs,%ax
+		mov %ax,%ds
+		mov %ax,%es
+		lidt idt_load
+		lgdt gdt_load
+		cli
+		mov $0x1,%ax
+		lmsw %ax
+		jmp $8,$0
+gdt:
+		.word 0,0,0,0
+		.word 0x7ff,0,0x9a01,0xc0	#text seg  0x8
+		.word 0x7ff,0,0x9201,0xc0	#data seg  0x10
+		.word 0x7ff,0x8000,0x920b,0xc0	#display seg 0x18
+idt_load:
+		.word 0,0,0
+gdt_load:
+		.word 0x7ff
+		.word gdt+0x7c00,0
 msg:	.ascii "begin real mode..."
 len=.-msg
 .org 510
